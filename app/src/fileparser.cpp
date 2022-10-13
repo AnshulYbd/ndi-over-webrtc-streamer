@@ -1,20 +1,9 @@
 /*
  * libdatachannel streamer example
- * Copyright (c) 2020 Filip Klembara (in2core)
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http://www.gnu.org/licenses/>.
+ * Anshul Yadav updated code for NDI compliance
  */
+
+
 
 #include "fileparser.hpp"
 #include <fstream>
@@ -52,8 +41,8 @@ FileParser::FileParser(string directory, string extension, uint32_t samplesPerSe
 	NDIlib_recv_create_v3_t mRecvType_H264;
 
 	mRecvType_H264.p_ndi_recv_name = "SRT-RECVR-H264";
-	mRecvType_H264.color_format = (NDIlib_recv_color_format_e)
-	    NDIlib_recv_color_format_ex_compressed_v5_with_audio; // NDIlib_recv_color_format_ex_compressed_v3_with_audio;
+	mRecvType_H264.color_format = (NDIlib_recv_color_format_e) NDIlib_recv_color_format_ex_compressed_v5_with_audio; 
+	// NDIlib_recv_color_format_ex_compressed_v3_with_audio;
 	mRecvType_H264.bandwidth = NDIlib_recv_bandwidth_highest;
 
 	NDIlib_source_t src;
@@ -66,8 +55,8 @@ FileParser::FileParser(string directory, string extension, uint32_t samplesPerSe
 		return ;
 
 	NDIlib_recv_connect(pNDI_recv, &src);
-
 }
+
 FileParser::~FileParser() {
 	// Destroy the receiver
 	NDIlib_recv_destroy(pNDI_recv);

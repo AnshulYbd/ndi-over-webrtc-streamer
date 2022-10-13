@@ -7,3 +7,5 @@ winBuild/.vs/BIRDDOG_NDI_OVER_WEBRTC_PROCESSOR/v16/Solution.VC.db
 winBuild/.vs/BIRDDOG_NDI_OVER_WEBRTC_PROCESSOR/v16/Solution.VC.db-shm
 winBuild/.vs/BIRDDOG_NDI_OVER_WEBRTC_PROCESSOR/v16/Solution.VC.db-wal
 winBuild/.vs/BIRDDOG_NDI_OVER_WEBRTC_PROCESSOR/v16/ipch/AutoPCH/daa2aedd2ea94632/FILEPARSER.ipch
+/winBuild
+/app/signaling-server-nodejs/node_modules

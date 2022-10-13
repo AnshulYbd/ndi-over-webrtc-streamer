@@ -23,16 +23,12 @@
 #include <optional>
 
 class H264FileParser: public FileParser {
-	std::optional<std::vector<std::byte>> previousUnitType5 = std::nullopt;
-	std::optional<std::vector<std::byte>> previousUnitType6 = std::nullopt;
-    std::optional<std::vector<std::byte>> previousUnitType7 = std::nullopt;
-	std::optional<std::vector<std::byte>> previousUnitType8 = std::nullopt;
-	std::optional<std::vector<std::byte>> previousUnitType8_2 = std::nullopt;
-
+	std::vector< std::optional<std::vector<std::byte>> > unitTypes{ std::nullopt };
 public:
     H264FileParser(std::string directory, uint32_t fps, bool loop);
     void loadNextSample() override;
     std::vector<std::byte> initialNALUS();
+	void emplaceLastNLU(int endPos, int beginPos) noexcept;
 	int findNal(uint8_t *start, uint8_t *end) noexcept;
 };
 

@@ -28,6 +28,7 @@
 #endif
 using namespace std;
 
+using NALU_TYPE = std::optional<std::vector<std::byte>>;
 
 H264FileParser::H264FileParser(string directory, uint32_t fps, bool loop): FileParser(directory, ".h264", fps, loop) { }
 struct offset {
@@ -37,89 +38,94 @@ struct offset {
 	offset(){}
 };
 
+void H264FileParser::emplaceLastNLU(int beginPos, int endPos ) noexcept
+{
+	NALU_TYPE nl;
+	nl = { sample.begin() + beginPos, sample.begin() + endPos };
+	unitTypes.emplace_back(std::move(nl));
+}
+
 int H264FileParser::findNal(uint8_t *start, uint8_t *end ) noexcept
 {
 	uint8_t* message = start;
 	int i = 0;
 	uint8_t *p = start ;
-
-	offset of5, of6, of7, of8, of8_2;
-	int type = 0, prevType = 0;
+	//std::cout << "\nNAL Type: ";
+	int type = -1, prevType = -1, prevPos = -1;
 	while (p +i <= end - 3) 
 	{
-		while ((p +i <= end - 3) && (p[i] || p[i + 1] || p[i+2] != 1) ){
-			++i;
+		while ((p +i <= end - 3) && (p[i] || p[i + 1] || p[i+2] != 1) )
+		{  
+			++i; 
 		}
-
-		if (p + i > end - 3) {
-			if (of5.end == -1)//couldnt reach to the end, may be a split frame,
-				of5.end = end - start;
-			previousUnitType5 = {sample.begin() + of5.begin, sample.begin() + of5.end};
-			previousUnitType6 = {sample.begin() + of6.begin, sample.begin() + of6.end};
-			previousUnitType7 = {sample.begin() + of7.begin, sample.begin() + of7.end};
-			previousUnitType8 = { sample.begin() + of8.begin, sample.begin() + of8.end };
-			if (of8_2.end == -1)// new h264 format webrtc seems blind, but accomodate it here.
-				of8_2.end = end - start;
-			if(of8_2.begin != -1)
-				previousUnitType8_2 = {sample.begin() + of8_2.begin, sample.begin() + of8_2.end};
-
+		if (p + i > end - 3) 
+		{
+			auto len = end - start;
+			assert(prevPos != -1);
+			emplaceLastNLU(prevPos, len);
 			return i;
 		}
-		
-		auto at = i - 1;
+		type = (int)(p[i + 3] & 0x1F);
+		//switch (type) {
+		//case 7: {//Sequence Parameter Set (SPS) - 7
+		//	std::cout << "7 - ";
+		//} break;
+		//case 8: {//Picture Parameter Set (PPS)- 8
+		//	std::cout << "8 - ";
+		//} break;
+		//case 5: {//Instantaneous Decoder Refresh - 5
+		//	std::cout << "5 - ";
+		//} break;
+		//case 6: {//Access Unit Delimiter (AUD) - 6
+		//	std::cout << "6 - ";
+		//} break;
+		//case 1:
+		//	std::cout << "1 - ";
+		//	break;
+		//default:
+		//	std::cout << "X[" << type << "] ";
+		//	break;
+		//}
 
-		type = (int)(p[at + 4] & 0x1F);
-		switch (type) {
-		case 7: {//Sequence Parameter Set (SPS) - 7
-			of7.begin = at + 4;
-		} break;
-		case 8: {//Picture Parameter Set (PPS)- 8
-			if (of8.begin == -1)
-				of8.begin = at + 4;
-			else
-				of8_2.begin = at + 4;
-		} break;
-		case 5: {//Instantaneous Decoder Refresh - 5
-			of5.begin = at + 4;
-		} break;
-		case 6: {//Access Unit Delimiter (AUD) - 6
-			of6.begin = at + 4;
-		} break;
-		case 1:
-			return 0;
-		default:
-			break;
-		}
 		switch (prevType) {
 		case 7: {
-			of7.end = at - 1;
+			assert(prevPos != -1);
+			emplaceLastNLU(prevPos, i );
+			prevPos = -1;
 		} break;
 		case 8: {
-			if (of8.end == -1)
-				of8.end = at - 1;
-			else
-				of8_2.end = at - 1;
+			assert(prevPos != -1);
+			emplaceLastNLU(prevPos, i );
+			prevPos = -1;		
 		} break;
 		case 5: {
-			of5.end = at - 1;
+			assert(prevPos != -1);
+			emplaceLastNLU(prevPos, i);
+			prevPos = -1;
 		} break;
 		case 6: { // Access Unit Delimiter (AUD)
-			of6.end = at - 1;
+			assert(prevPos != -1);
+			emplaceLastNLU(prevPos, i);
+			prevPos = -1;
 		} break;
+		case 1:{
+			assert(prevPos != -1);
+			emplaceLastNLU(prevPos, i);
+			prevPos = -1;
+		}break;
 		default:
 			break;
 		}
 		prevType = type;
+		prevPos = i + 4;
 		++i; 
 	}
-
-	/* Include 8 bits leading zero */
-	// if (p>start && *(p-1)==0)
-	//    return (p-1);
 	return i-1;
 }
+
 void H264FileParser::loadNextSample() {
-    FileParser::loadNextSample();
+    
+	FileParser::loadNextSample();
 
 #if defined LIVE_NDI_CAM_FEED && LIVE_NDI_CAM_FEED == 0
     size_t i = 0;
@@ -137,13 +143,13 @@ void H264FileParser::loadNextSample() {
 
         switch (type) {
             case 7:
-                previousUnitType7 = {sample.begin() + i, sample.begin() + naluEndIndex};
+				emplaceLastNLU(i, naluEndIndex);
                 break;
             case 8:
-                previousUnitType8 = {sample.begin() + i, sample.begin() + naluEndIndex};;
+				emplaceLastNLU(i, naluEndIndex);
                 break;
             case 5:
-                previousUnitType5 = {sample.begin() + i, sample.begin() + naluEndIndex};;
+				emplaceLastNLU(i, naluEndIndex);
                 break;
         }
         i = naluEndIndex;
@@ -152,36 +158,16 @@ void H264FileParser::loadNextSample() {
 #else 
 	auto start = sample.data();
 	auto end = sample.data() + sample.size() -1;
-
 	findNal((uint8_t *)start, (uint8_t*)end);
-
 #endif
 }
 
 vector<byte> H264FileParser::initialNALUS() {
     vector<byte> units{};
-    if (previousUnitType7.has_value()) {
-        auto nalu = previousUnitType7.value();
-        units.insert(units.end(), nalu.begin(), nalu.end());
-    }
-    
-	if (previousUnitType8.has_value()) {
-		auto nalu = previousUnitType8.value();
+	for (auto& unit : unitTypes){
+		auto nalu = unit.value();
 		units.insert(units.end(), nalu.begin(), nalu.end());
 	}
-	
-	if (previousUnitType8_2.has_value()) {
-		auto nalu = previousUnitType8_2.value();
-		units.insert(units.end(), nalu.begin(), nalu.end());
-	}
-
-    if (previousUnitType5.has_value()) {
-        auto nalu = previousUnitType5.value();
-        units.insert(units.end(), nalu.begin(), nalu.end());
-    }
-	if (previousUnitType6.has_value()) {
-		auto nalu = previousUnitType6.value();
-		units.insert(units.end(), nalu.begin(), nalu.end());
-	}
+	unitTypes.clear();
     return units;
 }
