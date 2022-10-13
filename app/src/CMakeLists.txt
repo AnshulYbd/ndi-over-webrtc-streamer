@@ -69,16 +69,13 @@ if(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
 else()
 	add_executable(BDWebrtcStreamer ${STREAMER_SOURCES})
 endif()
-set(CMAKE_CXX_STANDARD 17)
 set_target_properties(BDWebrtcStreamer PROPERTIES
 	CXX_STANDARD 17
+	CMAKE_CXX_STANDARD 17
 	OUTPUT_NAME BDWebrtcStreamer)
 
-# set_target_properties(BDWebrtcStreamer PROPERTIES
-# 	XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER com.github.paullouisageneau.libdatachannel.examples.BDWebrtcStreamer)
-# PASS srt compilation flags , as we borrow much from their test application interface
 if(MSVC)
-    target_compile_definitions( BDWebrtcStreamer PRIVATE WIN32 _WINDOWS _HAS_STD_BYTE=0 )
+    target_compile_definitions( BDWebrtcStreamer PRIVATE WIN32;_WINDOWS;WIN32_LEAN_AND_MEAN;NOMINMAX;_CRT_SECURE_NO_WARNINGS;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;RTC_ENABLE_WEBSOCKET=1;RTC_ENABLE_MEDIA=1;JSON_USE_IMPLICIT_CONVERSIONS=1;JSON_DIAGNOSTICS=0;CMAKE_INTDIR="Debug";LIVE_NDI_CAM_FEED=1 )
 	SET(WIN_LIBS ws2_32.lib)
 else()
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
@@ -87,10 +84,3 @@ endif()
 find_package(Threads REQUIRED)
 target_link_libraries(BDWebrtcStreamer ${WINLIBS} libndi libdc)
 
-# if(MSVC)
-# 	add_custom_command(TARGET BDWebrtcStreamer POST_BUILD
-# 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-# 		"$<TARGET_FILE_DIR:datachannel>/datachannel.dll"
-# 		$<TARGET_FILE_DIR:BDWebrtcStreamer>
-# 	)
-# endif()
