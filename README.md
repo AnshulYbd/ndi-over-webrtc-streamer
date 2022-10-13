@@ -1,14 +1,27 @@
-# Building the source
-mkdir winBuild && cd winBuild
-cmake .. && cmake --build . --config Debug
+## Prerequisites for building
 
-on Linux
-mkdir linuxBuild && cd linuxBuild
-cmake .. && cmake --build .
+  wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb
+  
+  dpkg -i libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb
+  
+  sudo ln -s <PATH>/ndi-over-webrtc-streamer/3rdParty/libs/ndi/libndi-x86_64.so.5 /usr/lib/x86_64-linux-gnu/libndi.so.5
+  
+  sudo ln -s <PATH>/ndi-over-webrtc-streamer/3rdParty/libs/libdc/libdatachannel.so /usr/lib/x86_64-linux-gnu/libdatachannel.so.0.17.10
+  
 
+## Building the source on Windows
+
+  mkdir winBuild && cd winBuild
+  
+  cmake .. && cmake --build . --config Debug
+
+## Building the source on Linux
+
+  mkdir linuxBuild && cd linuxBuild
+  
+  cmake .. && cmake --build .
 
 # Streaming H264 and opus
-
 This example streams H264 and opus(not tested )<sup id="a1">[1](#f1)</sup> samples to the connected browser client.
 
 ## Start the example signaling server
