@@ -18,6 +18,8 @@ SET(LIBS_3RD_PARTY_NDI_LINUX        ${LIBS_3RD_PARTY_NDI_PATH}/libndi-x86_64.so.
 SET(LIBS_3RD_PARTY_DC_WIN      		${LIBS_3RD_PARTY_DC_PATH}/datachannel.lib)
 SET(LIBS_3RD_PARTY_DC_LINUX        ${LIBS_3RD_PARTY_DC_PATH}/libdatachannel.so)
 
+SET(DLL_PATH_DC ${LIBS_3RD_PARTY_DC_PATH}/datachannel.dll)
+SET(DLL_PATH_NDI ${LIBS_3RD_PARTY_NDI_PATH}/Processing.NDI.Lib.Advanced.x64.dll)
 
 if (MSVC)
 	SET(LIB_NDI_SHARED	${LIBS_3RD_PARTY_NDI_WIN_LIB})
@@ -84,3 +86,15 @@ endif()
 find_package(Threads REQUIRED)
 target_link_libraries(BDWebrtcStreamer ${WINLIBS} libndi libdc)
 
+if(MSVC)
+	add_custom_command(TARGET BDWebrtcStreamer POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${DLL_PATH_DC}
+		$<TARGET_FILE_DIR:BDWebrtcStreamer>
+	)
+	add_custom_command(TARGET BDWebrtcStreamer POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	${DLL_PATH_NDI}
+	$<TARGET_FILE_DIR:BDWebrtcStreamer>
+)
+endif()
