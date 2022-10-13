@@ -8,6 +8,9 @@
   
   sudo ln -s <PATH>/ndi-over-webrtc-streamer/3rdParty/libs/libdc/libdatachannel.so /usr/lib/x86_64-linux-gnu/libdatachannel.so.0.17.10
   
+  NDI camera should output H264 without split nonIDR frames.
+
+  Camer name hardcoded in #Fileparser.cpp line #60 src.p_ndi_name = "NDIPTZ2 (Chan_1, 192.168.208.50)"; 
 
 ## Building the source on Windows
 
@@ -27,17 +30,17 @@ This example streams H264 and opus(not tested )<sup id="a1">[1](#f1)</sup> sampl
 ## Start the example signaling server
 
 ```sh
-cd <checkoutbasedir>\app\signaling-server-nodejs>
+cd <PATH>\app\signaling-server-nodejs>
 npm install
 npm start
 ```
 
-## Start a web server
-
-open index.html in chrome ( tested only in chrome browser)
-
-## Start the streamer
-Run app either from VS2019 or from command prompt
+## How to stream video steps
+  1. Run node npm start to run server
+  2. Launch web page index.html in chrome by double clicking it
+  3. Run the streamer app
+Streamer app read the frames from ndi camera and rtp packetized it and send it to chrome browser after handshaking of SDP and Answer.
+  
 
 Arguments:
 
@@ -48,11 +51,8 @@ Arguments:
 - `-v` Enable debug logs.
 - `-h` Print this help and exit.
 
-
-Press START Button on chrome web page
-Things to check
-NDI camera output H264
-Camer name src.p_ndi_name = "NDIPTZ2 (Chan_1, 192.168.208.50)"; #Fileparser.cpp line number 60 change and recompile or create commandline argument parameter args
+## RUNNING the example 
+Press START Button on chrome web page  
 
 ## Generating H264 and Opus samples
 Refer libdatachannel streamer example for more details.
