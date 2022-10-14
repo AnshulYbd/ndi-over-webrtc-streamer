@@ -50,7 +50,9 @@ int H264FileParser::findNal(uint8_t *start, uint8_t *end ) noexcept
 	uint8_t* message = start;
 	int i = 0;
 	uint8_t *p = start ;
-	//std::cout << "\nNAL Type: ";
+#if defined PRINT_NALU && PRINT_NALU == 1 
+	std::cout << "\nNAL Type: ";
+#endif
 	int type = -1, prevType = -1, prevPos = -1;
 	while (p +i <= end - 3) 
 	{
@@ -65,28 +67,34 @@ int H264FileParser::findNal(uint8_t *start, uint8_t *end ) noexcept
 			emplaceLastNLU(prevPos, len);
 			return i;
 		}
+		
+		auto foundPos = i - 1 +4;
+		auto header = reinterpret_cast<rtc::NalUnitHeader*>(p + foundPos);
+		auto htype = header->unitType();
 		type = (int)(p[i + 3] & 0x1F);
-		//switch (type) {
-		//case 7: {//Sequence Parameter Set (SPS) - 7
-		//	std::cout << "7 - ";
-		//} break;
-		//case 8: {//Picture Parameter Set (PPS)- 8
-		//	std::cout << "8 - ";
-		//} break;
-		//case 5: {//Instantaneous Decoder Refresh - 5
-		//	std::cout << "5 - ";
-		//} break;
-		//case 6: {//Access Unit Delimiter (AUD) - 6
-		//	std::cout << "6 - ";
-		//} break;
-		//case 1:
-		//	std::cout << "1 - ";
-		//	break;
-		//default:
-		//	std::cout << "X[" << type << "] ";
-		//	break;
-		//}
 
+#if defined PRINT_NALU && PRINT_NALU == 1 
+		switch (type) {
+		case 7: {//Sequence Parameter Set (SPS) - 7
+			std::cout << "7 - ";
+		} break;
+		case 8: {//Picture Parameter Set (PPS)- 8
+			std::cout << "8 - ";
+		} break;
+		case 5: {//Instantaneous Decoder Refresh - 5
+			std::cout << "5 - ";
+		} break;
+		case 6: {//Access Unit Delimiter (AUD) - 6
+			std::cout << "6 - ";
+		} break;
+		case 1:
+			std::cout << "1 - ";
+			break;
+		default:
+			std::cout << "X[" << type << "] ";
+			break;
+		}
+#endif
 		switch (prevType) {
 		case 7: {
 			assert(prevPos != -1);
@@ -117,8 +125,8 @@ int H264FileParser::findNal(uint8_t *start, uint8_t *end ) noexcept
 			break;
 		}
 		prevType = type;
-		prevPos = i + 4;
-		++i; 
+		prevPos = i + 3;
+		i = i+3; 
 	}
 	return i-1;
 }
@@ -127,44 +135,18 @@ void H264FileParser::loadNextSample() {
     
 	FileParser::loadNextSample();
 
-#if defined LIVE_NDI_CAM_FEED && LIVE_NDI_CAM_FEED == 0
-    size_t i = 0;
-    while (i < sample.size()) {
-        assert(i + 4 < sample.size());
-		auto nextUnitPtr = sample.data() + i;
-        auto lengthPtr = (uint32_t *) (sample.data() + i);//19 00 00 00 
-        uint32_t length = ntohl(*lengthPtr);//00000019
-        auto naluStartIndex = i + 4;
-        auto naluEndIndex = naluStartIndex + length;
-        assert(naluEndIndex <= sample.size());
-        auto header = reinterpret_cast<rtc::NalUnitHeader *>(sample.data() + naluStartIndex);
-        auto type = header->unitType();
-		auto d = ((uint8_t)(*(nextUnitPtr + 4) )& 0x1F );
-
-        switch (type) {
-            case 7:
-				emplaceLastNLU(i, naluEndIndex);
-                break;
-            case 8:
-				emplaceLastNLU(i, naluEndIndex);
-                break;
-            case 5:
-				emplaceLastNLU(i, naluEndIndex);
-                break;
-        }
-        i = naluEndIndex;
-    }
-
-#else 
 	auto start = sample.data();
 	auto end = sample.data() + sample.size() -1;
-	findNal((uint8_t *)start, (uint8_t*)end);
-#endif
+	if(!sample.empty())
+		findNal((uint8_t *)start, (uint8_t*)end);
+
 }
 
 vector<byte> H264FileParser::initialNALUS() {
     vector<byte> units{};
 	for (auto& unit : unitTypes){
+		if (unit == nullopt)
+			continue;
 		auto nalu = unit.value();
 		units.insert(units.end(), nalu.begin(), nalu.end());
 	}

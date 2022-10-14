@@ -108,7 +108,7 @@ void Stream::start() {
     }
     _isRunning = true;
     startTime = currentTimeInMicroSeconds();
-    //audio->start();
+    audio->start();
     video->start();
     dispatchQueue.dispatch([this]() {
         this->sendSample();

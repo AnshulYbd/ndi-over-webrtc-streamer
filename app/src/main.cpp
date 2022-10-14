@@ -219,12 +219,8 @@ shared_ptr<ClientTrackData> addVideo(const shared_ptr<PeerConnection> pc, const 
     // create RTP configuration
     auto rtpConfig = make_shared<RtpPacketizationConfig>(ssrc, cname, payloadType, H264RtpPacketizer::defaultClockRate);
 
-#if defined LIVE_NDI_CAM_FEED && LIVE_NDI_CAM_FEED == 0
-	auto packetizer = make_shared<H264RtpPacketizer>(H264RtpPacketizer::Separator::Length, rtpConfig);
-#else
 	// create packetizer
 	auto packetizer = make_shared<H264RtpPacketizer>(H264RtpPacketizer::Separator::LongStartSequence, rtpConfig);
-#endif
 	// 
     // create H264 handler
     auto h264Handler = make_shared<H264PacketizationHandler>(packetizer);
@@ -329,7 +325,7 @@ shared_ptr<Client> createPeerConnection(const Configuration &config,
     });
 
     dc->onMessage(nullptr, [id, wdc = make_weak_ptr(dc)](string msg) {
-        cout << "Message from " << id << " received: " << msg << endl;
+        //cout << "Message from " << id << " received: " << msg << endl;
         if (auto dc = wdc.lock()) {
             dc->send("Ping");
         }

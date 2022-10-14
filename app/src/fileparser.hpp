@@ -34,13 +34,12 @@ class FileParser: public StreamSource {
 	NDIlib_recv_instance_t pNDI_recv = nullptr;
 
 public:
-    const uint64_t sampleDuration_us;
+    uint64_t sampleDuration_us;
     virtual void start();
     virtual void stop();
     FileParser(std::string directory, std::string extension, uint32_t samplesPerSecond, bool loop);
 	~FileParser(); 
     virtual void loadNextSample();
-	virtual int NdiMain();
 };
 
 #endif /* fileparser_hpp */
