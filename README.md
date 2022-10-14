@@ -41,17 +41,12 @@ npm start
   3. Run the streamer app
   4. Press START Button on chrome web page  
 Streamer app read the frames from ndi camera and rtp packetized it and send it to chrome browser after handshaking of SDP and Answer.
-  
 
 Arguments:
-
-- `-a` Directory with OPUS samples (default: *../../../../examples/streamer/samples/opus/*).
-- `-b` Directory with H264 samples (default: *../../../../examples/streamer/samples/h264/*).
 - `-d` Signaling server IP address (default: 127.0.0.1).
 - `-p` Signaling server port (default: 8000).
 - `-v` Enable debug logs.
 - `-h` Print this help and exit.
-
 
 
 ## Generating H264 and Opus samples
