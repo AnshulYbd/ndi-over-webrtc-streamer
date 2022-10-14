@@ -37,7 +37,7 @@ npm start
 
 ## How to stream video steps
   1. Run node npm start to run server
-  2. Launch web page index.html in chrome by double clicking it
+  2. Launch or Refresh web page index.html in chrome by double clicking it, before every start Refresh webpage is required.
   3. Run the streamer app
   4. Press START Button on chrome web page  
 Streamer app read the frames from ndi camera and rtp packetized it and send it to chrome browser after handshaking of SDP and Answer.
