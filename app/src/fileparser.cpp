@@ -45,8 +45,8 @@ FileParser::FileParser(string directory, string extension, uint32_t samplesPerSe
 	mRecvType_H264.bandwidth = NDIlib_recv_bandwidth_highest;
 
 	NDIlib_source_t src;
-	//src.p_ndi_name = "NDIPTZ2 (Chan_1, 192.168.208.50)";
-	src.p_ndi_name = "PTZOpticsCamera (Channel 1)";
+	src.p_ndi_name = "NDIPTZ2 (Chan_1, 192.168.208.50)";
+	//src.p_ndi_name = "PTZOpticsCamera (Channel 1)";
 
 	mRecvType_H264.source_to_connect_to = src;
 	pNDI_recv = NDIlib_recv_create_v4(&mRecvType_H264);
