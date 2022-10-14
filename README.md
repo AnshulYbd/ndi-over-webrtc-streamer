@@ -11,6 +11,8 @@
   NDI camera should output H264 without split nonIDR frames.
 
   Camer name hardcoded in #Fileparser.cpp line #48 src.p_ndi_name = "NDIPTZ2 (Chan_1, 192.168.208.50)"; 
+  
+  >>>https://github.com/BirdDog-Australia/ndi-over-webrtc.git
 
 ## Building the source on Windows
 
