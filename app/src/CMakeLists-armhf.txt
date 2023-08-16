@@ -1,0 +1,101 @@
+cmake_minimum_required(VERSION 3.7)
+
+
+SET(3RD_PARTY           ${CMAKE_CURRENT_SOURCE_DIR}/../../3rdParty)
+
+INCLUDE_DIRECTORIES( ${3RD_PARTY}/headers/ndi
+					${CMAKE_CURRENT_SOURCE_DIR}/include
+					${3RD_PARTY}/headers/json/include
+					${CMAKE_CURRENT_SOURCE_DIR}/include/rtc
+					)
+
+SET(LIBS_3RD_PARTY_AVAHI_PATH      ${3RD_PARTY}/arm-linux-gnueabihf/Avahi)
+SET(LIBS_3RD_PARTY_DC_ARMHF        ${3RD_PARTY}/arm-linux-gnueabihf/libdatachannel.so.0.18.5)
+SET(LIBS_3RD_PARTY_NDI_ARMHF        ${3RD_PARTY}/arm-linux-gnueabihf/libndi-armv7l.so.5)
+
+set(STREAMER_SOURCES
+	main.cpp
+	dispatchqueue.cpp
+	dispatchqueue.hpp
+	h264fileparser.cpp
+	h264fileparser.hpp
+	helpers.cpp
+	helpers.hpp
+	opusfileparser.cpp
+	opusfileparser.hpp
+	fileparser.cpp
+	fileparser.hpp
+	stream.cpp
+	stream.hpp
+	ArgParser.cpp
+	ArgParser.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/include/rtc/rtppacketizationconfig.hpp
+)
+
+AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/include/rtc  SOURCE_FILES)
+
+set(STREAMER_UWP_RESOURCES
+	uwp/Logo.png
+	uwp/package.appxManifest
+	uwp/SmallLogo.png
+	uwp/SmallLogo44x44.png
+	uwp/SplashScreen.png
+	uwp/StoreLogo.png
+	uwp/Windows_TemporaryKey.pfx
+)
+
+add_executable(BDWebrtcStreamer ${STREAMER_SOURCES} ${SOURCE_FILES})
+
+set_target_properties(BDWebrtcStreamer PROPERTIES
+	CXX_STANDARD 17
+	CMAKE_CXX_STANDARD 17
+	OUTPUT_NAME BDWebrtcStreamer)
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+find_package(Threads REQUIRED)
+#supplied libraries
+add_library(libndi STATIC IMPORTED)
+set_property(TARGET libndi PROPERTY IMPORTED_LOCATION ${LIBS_3RD_PARTY_NDI_ARMHF})
+
+#supplied libraries
+add_library(libdc STATIC IMPORTED)
+set_property(TARGET libdc PROPERTY IMPORTED_LOCATION ${LIBS_3RD_PARTY_DC_ARMHF})
+
+#SHARED libraries
+add_library(libdbus1 STATIC IMPORTED)
+set_property(TARGET libdbus1 PROPERTY IMPORTED_LOCATION ${LIBS_3RD_PARTY_AVAHI_PATH}/libdbus-1.a)
+add_library(libdbus SHARED IMPORTED)
+set_property(TARGET libdbus PROPERTY IMPORTED_LOCATION ${LIBS_3RD_PARTY_AVAHI_PATH}/libdbus-1.so.3.14.6)
+add_library(libavahi-client SHARED IMPORTED)
+set_target_properties( libavahi-client PROPERTIES IMPORTED_LOCATION ${LIBS_3RD_PARTY_AVAHI_PATH}/libavahi-client.so.3.2.9)
+add_library(libavahi-common SHARED IMPORTED)
+set_target_properties( libavahi-common PROPERTIES IMPORTED_LOCATION ${LIBS_3RD_PARTY_AVAHI_PATH}/libavahi-common.so.3.5.3)
+add_library(libselinux SHARED IMPORTED)
+set_property(TARGET libselinux PROPERTY IMPORTED_LOCATION ${LIBS_3RD_PARTY_AVAHI_PATH}/libselinux.so.1 )
+add_library(libpcre SHARED IMPORTED)
+set_property(TARGET libpcre PROPERTY IMPORTED_LOCATION ${LIBS_3RD_PARTY_AVAHI_PATH}/libpcre.so.3.13.2 )
+add_library(libgpg-error SHARED IMPORTED)
+set_property(TARGET libgpg-error PROPERTY IMPORTED_LOCATION ${LIBS_3RD_PARTY_AVAHI_PATH}/libgpg-error.so.0.17.0)
+add_library(liblzma SHARED IMPORTED)
+set_property(TARGET liblzma PROPERTY IMPORTED_LOCATION ${LIBS_3RD_PARTY_AVAHI_PATH}/liblzma.so.5.0.0)
+add_library(libgcrypt SHARED IMPORTED)
+set_property(TARGET libgcrypt PROPERTY IMPORTED_LOCATION ${LIBS_3RD_PARTY_AVAHI_PATH}/libgcrypt.so.20.0.5)
+add_library(libsystemd SHARED IMPORTED)
+set_property(TARGET libsystemd PROPERTY IMPORTED_LOCATION ${LIBS_3RD_PARTY_AVAHI_PATH}/libsystemd.so.0.14)
+add_library(libglib SHARED IMPORTED)
+set_property(TARGET libglib PROPERTY IMPORTED_LOCATION ${LIBS_3RD_PARTY_AVAHI_PATH}/libglib-2.0.so.0.4800.2)
+target_link_libraries(BDWebrtcStreamer 
+	${WINLIBS} 
+	libdbus1
+	libdbus
+	libselinux
+	libpcre
+	libgpg-error
+	liblzma
+	libgcrypt
+	libsystemd
+	libndi
+	libavahi-common
+	libavahi-client
+	libdc 
+)

@@ -1,0 +1,2 @@
+git clone https://github.com/AnshulYbd/openssl-cmake.git
+cmake -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=..\mingw.cmake .. && cd build && cmake --build .
